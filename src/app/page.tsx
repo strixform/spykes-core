@@ -10,6 +10,7 @@ type TrendRow = {
   global_score?: number
   momentum?: string
   top_location?: string
+  windowBucket?: "all" | "24h" | "today" | "7d"
 }
 
 type HomeSearchParams = {
@@ -18,19 +19,15 @@ type HomeSearchParams = {
   window?: string
 }
 
-// load trends from backend
 async function getTrends(): Promise<TrendRow[]> {
   try {
-    const res = await apiFetch("/api/trends", { cache: "no-store" })
-    if (!res.ok) return []
-    const data = (await res.json()) as TrendRow[]
+    const data = (await apiFetch("/api/trends")) as TrendRow[]
     return Array.isArray(data) ? data : []
   } catch {
     return []
   }
 }
 
-// heuristic for momentum from score (for demo)
 function deriveMomentum(score?: number): "Rising" | "Stable" | "Cooling" {
   if (typeof score !== "number") return "Stable"
   if (score >= 80) return "Rising"
@@ -38,7 +35,6 @@ function deriveMomentum(score?: number): "Rising" | "Stable" | "Cooling" {
   return "Stable"
 }
 
-// heuristic for time window bucket from score (for demo)
 function deriveWindow(score?: number): "all" | "24h" | "today" | "7d" {
   if (typeof score !== "number") return "all"
   if (score >= 85) return "24h"
@@ -96,7 +92,6 @@ export default async function HomePage({
   ]
   const maxHeat = heatmap.reduce((m, r) => Math.max(m, r.value), 1)
 
-  // helper to keep q + momentum + window in links
   const buildHref = (opts: {
     q?: string
     momentum?: string
@@ -106,7 +101,8 @@ export default async function HomePage({
     if (opts.q) params.set("q", opts.q)
     if (opts.momentum && opts.momentum !== "all")
       params.set("momentum", opts.momentum)
-    if (opts.window && opts.window !== "all") params.set("window", opts.window)
+    if (opts.window && opts.window !== "all")
+      params.set("window", opts.window)
     const q = params.toString()
     return q ? `/?${q}` : "/"
   }
@@ -114,12 +110,11 @@ export default async function HomePage({
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 md:py-10">
-        {/* TOP HEADER */}
+        {/* HEADER */}
         <header className="space-y-3">
           <p className="text-xs uppercase tracking-[0.28em] text-sky-400">
             Spykes
           </p>
-
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div className="space-y-2">
               <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
@@ -130,7 +125,6 @@ export default async function HomePage({
                 time. Track the signals before they become noise.
               </p>
             </div>
-
             <div className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-xs text-emerald-200">
               <p className="uppercase tracking-[0.22em]">Backend status</p>
               <p className="mt-1 font-medium">Online · data sample feed</p>
@@ -163,19 +157,13 @@ export default async function HomePage({
           </form>
 
           <div className="flex flex-wrap items-center gap-3 text-[11px]">
-            {/* TIME WINDOW FILTER */}
+            {/* TIME WINDOW */}
             <div className="flex items-center gap-2">
               <span className="uppercase tracking-[0.18em] text-slate-400">
                 Time window
               </span>
               <div className="flex gap-1">
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: momentumFilter,
-                    window: "all",
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "all" })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -187,13 +175,7 @@ export default async function HomePage({
                     All
                   </span>
                 </a>
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: momentumFilter,
-                    window: "24h",
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "24h" })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -205,13 +187,7 @@ export default async function HomePage({
                     24h
                   </span>
                 </a>
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: momentumFilter,
-                    window: "today",
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "today" })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -223,13 +199,7 @@ export default async function HomePage({
                     Today
                   </span>
                 </a>
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: momentumFilter,
-                    window: "7d",
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "7d" })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -244,19 +214,13 @@ export default async function HomePage({
               </div>
             </div>
 
-            {/* MOMENTUM FILTERS */}
+            {/* MOMENTUM */}
             <div className="flex items-center gap-2">
               <span className="uppercase tracking-[0.18em] text-slate-400">
                 Momentum
               </span>
               <div className="flex gap-1">
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: "all",
-                    window: windowFilter,
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: "all", window: windowFilter })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -268,13 +232,7 @@ export default async function HomePage({
                     All
                   </span>
                 </a>
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: "rising",
-                    window: windowFilter,
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: "rising", window: windowFilter })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -286,13 +244,7 @@ export default async function HomePage({
                     Rising
                   </span>
                 </a>
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: "stable",
-                    window: windowFilter,
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: "stable", window: windowFilter })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -304,13 +256,7 @@ export default async function HomePage({
                     Stable
                   </span>
                 </a>
-                <a
-                  href={buildHref({
-                    q: searchQuery,
-                    momentum: "cooling",
-                    window: windowFilter,
-                  })}
-                >
+                <a href={buildHref({ q: searchQuery, momentum: "cooling", window: windowFilter })}>
                   <span
                     className={
                       "rounded-full px-3 py-1 " +
@@ -329,7 +275,7 @@ export default async function HomePage({
 
         {/* MAIN GRID */}
         <section className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
-          {/* TREND CARDS LEFT */}
+          {/* TREND CARDS */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -373,7 +319,6 @@ export default async function HomePage({
                           {trend.description || "No description yet."}
                         </p>
                       </div>
-
                       <div className="flex flex-col items-end gap-2">
                         <span
                           className={
@@ -395,16 +340,6 @@ export default async function HomePage({
                     </div>
 
                     <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-slate-400">
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
-                        <span>Mentions</span>
-                        <span className="text-slate-200 font-medium">—</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                        <span>Reach</span>
-                        <span className="text-slate-200 font-medium">—</span>
-                      </div>
                       <div className="flex items-center gap-1.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                         <span>Top location</span>
@@ -436,7 +371,7 @@ export default async function HomePage({
             </div>
           </div>
 
-          {/* LOCATION HEATMAP RIGHT */}
+          {/* LOCATION HEATMAP */}
           <aside className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -444,7 +379,6 @@ export default async function HomePage({
               </p>
               <p className="text-[10px] text-slate-500">Across Nigeria</p>
             </div>
-
             <div className="rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-4 space-y-2">
               {heatmap.map((row) => {
                 const width = `${Math.max(
@@ -468,7 +402,6 @@ export default async function HomePage({
                 )
               })}
             </div>
-
             <p className="text-[11px] text-slate-500">
               Surface watching local data only. Backend on port 5000 feeds this
               deck in real time.
