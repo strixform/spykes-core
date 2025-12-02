@@ -1,18 +1,26 @@
 import { Pool } from "pg";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not set in environment variables");
+let pool: Pool | null = null;
+
+function getPool() {
+  if (!pool) {
+    if (!process.env.DATABASE_URL) {
+      console.error("DATABASE_URL is not set in environment variables");
+      throw new Error("DATABASE_URL missing");
+    }
+
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+  }
+  return pool;
 }
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
-
 export async function query(text: string, params?: any[]) {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     const res = await client.query(text, params);
     return res;
