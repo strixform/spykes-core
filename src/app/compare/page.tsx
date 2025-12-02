@@ -9,6 +9,7 @@ type Trend = {
   title: string
   description?: string
   global_score?: number
+  top_location?: string
 }
 
 type LocationRow = {
