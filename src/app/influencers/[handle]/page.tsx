@@ -1,7 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import { apiFetch } from "../../../lib/apiClient"
-import AddToShortlistButton from "@/components/AddToShortlistButton"
+import AddToShortlistButton from "../../../components/AddToShortlistButton"
 
 type Influencer = {
   id: string
