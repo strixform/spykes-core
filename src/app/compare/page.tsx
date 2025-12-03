@@ -1,6 +1,6 @@
 import React from "react"
 import Link from "next/link"
-import { apiFetch } from "../../lib/apiClient"
+import { apiFetch } from "@/lib/apiClient"
 
 type Trend = {
   id: string
@@ -20,10 +20,7 @@ async function getTrend(slug: string): Promise<Trend | null> {
   if (!slug) return null
 
   try {
-    const res = await apiFetch(`/api/trends/${slug}`)
-    if (!res.ok) return null
-
-    const data = (await res.json()) as {
+    const data = (await apiFetch(`/api/trends/${slug}`)) as {
       trend?: Trend
       locations?: { state: string }[]
     }
@@ -97,7 +94,6 @@ export default async function ComparePage({
           </div>
         </header>
 
-        {/* URL hint */}
         <section className="rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-[11px] text-slate-400 space-y-1">
           <p className="font-medium text-slate-200">How to switch signals</p>
           <p>
@@ -108,14 +104,13 @@ export default async function ComparePage({
           </p>
           <p>
             Current: left ={" "}
-            <span className="font-mono text-sky-200">{leftSlug}</span>, right =
-            <span className="font-mono text-sky-200"> {rightSlug}</span>
+            <span className="font-mono text-sky-200">{leftSlug}</span>, right ={" "}
+            <span className="font-mono text-sky-200">{rightSlug}</span>
           </p>
         </section>
 
-        {/* comparison grid */}
         <section className="grid gap-6 md:grid-cols-2">
-          {/* LEFT SIGNAL */}
+          {/* Left signal */}
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-950/95 px-5 py-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
@@ -133,9 +128,7 @@ export default async function ComparePage({
                 </p>
                 <div className="grid grid-cols-3 gap-3 text-[11px] text-slate-400 mt-3">
                   <div>
-                    <p className="uppercase tracking-wide text-[10px]">
-                      Score
-                    </p>
+                    <p className="uppercase tracking-wide text-[10px]">Score</p>
                     <p className="text-slate-100 font-semibold">
                       {formatScore(leftTrend.global_score) ?? "—"}
                     </p>
@@ -149,9 +142,7 @@ export default async function ComparePage({
                     </p>
                   </div>
                   <div>
-                    <p className="uppercase tracking-wide text-[10px]">
-                      Slug
-                    </p>
+                    <p className="uppercase tracking-wide text-[10px]">Slug</p>
                     <p className="font-mono text-slate-300">
                       {leftTrend.slug}
                     </p>
@@ -171,7 +162,7 @@ export default async function ComparePage({
             )}
           </div>
 
-          {/* RIGHT SIGNAL */}
+          {/* Right signal */}
           <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-950/95 px-5 py-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
@@ -189,9 +180,7 @@ export default async function ComparePage({
                 </p>
                 <div className="grid grid-cols-3 gap-3 text-[11px] text-slate-400 mt-3">
                   <div>
-                    <p className="uppercase tracking-wide text-[10px]">
-                      Score
-                    </p>
+                    <p className="uppercase tracking-wide text-[10px]">Score</p>
                     <p className="text-slate-100 font-semibold">
                       {formatScore(rightTrend.global_score) ?? "—"}
                     </p>
@@ -205,9 +194,7 @@ export default async function ComparePage({
                     </p>
                   </div>
                   <div>
-                    <p className="uppercase tracking-wide text-[10px]">
-                      Slug
-                    </p>
+                    <p className="uppercase tracking-wide text-[10px]">Slug</p>
                     <p className="font-mono text-slate-300">
                       {rightTrend.slug}
                     </p>
