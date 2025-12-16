@@ -38,7 +38,7 @@ async function fetchGoogleTrendsNigeria() {
     },
   })
 
-  const data = await res.json()
+ const data: any = await res.json()
 
   console.log("RAW GOOGLE TRENDS DATA:")
   console.log(JSON.stringify(data, null, 2))
