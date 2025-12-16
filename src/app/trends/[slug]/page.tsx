@@ -1,6 +1,7 @@
 import React from "react"
 import AddToShortlistButton from "./AddToShortlistButton"
 import { apiFetch } from "@/lib/apiClient"
+import { TrendBadges } from "@/components/TrendBadges"
 
 type Trend = {
   id: string
@@ -10,6 +11,8 @@ type Trend = {
   global_score: number
   first_seen_at: string
   last_seen_at: string
+  source?: string
+  kind?: string
 }
 
 type LocationRow = {
@@ -42,9 +45,7 @@ type TrendPageProps = {
 
 async function getTrendDetail(slug: string): Promise<TrendDetailResponse | null> {
   try {
-    const data = (await apiFetch(
-      `/api/trends/${slug}`
-    )) as TrendDetailResponse
+    const data = (await apiFetch(`/api/trends/${slug}`)) as TrendDetailResponse
     if (!data || !data.trend) return null
     return data
   } catch {
@@ -150,6 +151,18 @@ export default async function TrendPage({ params }: TrendPageProps) {
             <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
               {trend.title}
             </h1>
+
+            <TrendBadges source={trend.source} kind={trend.kind} />
+
+            <div className="mt-1">
+              <a
+                href={`/rooms/${trend.slug}`}
+                className="text-[11px] text-sky-300 hover:text-sky-200"
+              >
+                Open room for this signal →
+              </a>
+            </div>
+
             <p className="text-sm md:text-base text-slate-300 max-w-2xl">
               {trend.description}
             </p>
@@ -240,8 +253,7 @@ export default async function TrendPage({ params }: TrendPageProps) {
           )}
         </section>
 
-        {/* influencers + actions are same as before... */}
-        {/* you can keep your existing influencers & actions sections here */}
+        {/* influencers + actions can still be added here if needed */}
 
       </div>
     </main>

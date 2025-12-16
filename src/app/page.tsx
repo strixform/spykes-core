@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
-import { apiFetch } from "../lib/apiClient"
+import { apiFetch } from "@/lib/apiClient"
+import { TrendBadges } from "@/components/TrendBadges"
 
 type TrendRow = {
   id: string
@@ -10,6 +11,8 @@ type TrendRow = {
   global_score?: number
   momentum?: string
   top_location?: string
+  source?: string
+  kind?: string
   windowBucket?: "all" | "24h" | "today" | "7d"
 }
 
@@ -17,6 +20,7 @@ type HomeSearchParams = {
   q?: string
   momentum?: string
   window?: string
+  source?: string
 }
 
 async function getTrends(): Promise<TrendRow[]> {
@@ -54,6 +58,7 @@ export default async function HomePage({
   const searchQuery = (sp.q || "").toLowerCase().trim()
   const momentumFilter = (sp.momentum || "all").toLowerCase()
   const windowFilter = (sp.window || "all").toLowerCase()
+  const sourceFilter = (sp.source || "all").toLowerCase()
 
   const trends = trendsRaw
     .map((t) => {
@@ -73,6 +78,9 @@ export default async function HomePage({
       }
       if (windowFilter !== "all") {
         if (t.windowBucket !== windowFilter) return false
+      }
+      if (sourceFilter !== "all") {
+        if (!t.source || t.source.toLowerCase() !== sourceFilter) return false
       }
       return true
     })
@@ -96,6 +104,7 @@ export default async function HomePage({
     q?: string
     momentum?: string
     window?: string
+    source?: string
   }) => {
     const params = new URLSearchParams()
     if (opts.q) params.set("q", opts.q)
@@ -103,6 +112,8 @@ export default async function HomePage({
       params.set("momentum", opts.momentum)
     if (opts.window && opts.window !== "all")
       params.set("window", opts.window)
+    if (opts.source && opts.source !== "all")
+      params.set("source", opts.source)
     const q = params.toString()
     return q ? `/?${q}` : "/"
   }
@@ -155,7 +166,7 @@ export default async function HomePage({
               Reset
             </a>
           </form>
-
+          
           <div className="flex flex-wrap items-center gap-3 text-[11px]">
             {/* TIME WINDOW */}
             <div className="flex items-center gap-2">
@@ -163,53 +174,17 @@ export default async function HomePage({
                 Time window
               </span>
               <div className="flex gap-1">
-                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "all" })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (windowFilter === "all"
-                        ? "bg-slate-200 text-slate-900"
-                        : "border border-slate-600")
-                    }
-                  >
-                    All
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "all", source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (windowFilter === "all" ? "bg-slate-200 text-slate-900" : "border border-slate-600")}>All</span>
                 </a>
-                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "24h" })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (windowFilter === "24h"
-                        ? "border border-cyan-400 text-cyan-200 bg-cyan-500/10"
-                        : "border border-slate-600")
-                    }
-                  >
-                    24h
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "24h", source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (windowFilter === "24h" ? "border border-cyan-400 text-cyan-200 bg-cyan-500/10" : "border border-slate-600")}>24h</span>
                 </a>
-                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "today" })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (windowFilter === "today"
-                        ? "border border-emerald-500/60 text-emerald-300 bg-emerald-500/10"
-                        : "border border-slate-600")
-                    }
-                  >
-                    Today
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "today", source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (windowFilter === "today" ? "border border-emerald-500/60 text-emerald-300 bg-emerald-500/10" : "border border-slate-600")}>Today</span>
                 </a>
-                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "7d" })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (windowFilter === "7d"
-                        ? "border border-violet-500/60 text-violet-300 bg-violet-500/10"
-                        : "border border-slate-600")
-                    }
-                  >
-                    7 days
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: "7d", source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (windowFilter === "7d" ? "border border-violet-500/60 text-violet-300 bg-violet-500/10" : "border border-slate-600")}>7 days</span>
                 </a>
               </div>
             </div>
@@ -220,53 +195,35 @@ export default async function HomePage({
                 Momentum
               </span>
               <div className="flex gap-1">
-                <a href={buildHref({ q: searchQuery, momentum: "all", window: windowFilter })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (momentumFilter === "all"
-                        ? "bg-slate-200 text-slate-900"
-                        : "border border-slate-600")
-                    }
-                  >
-                    All
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: "all", window: windowFilter, source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (momentumFilter === "all" ? "bg-slate-200 text-slate-900" : "border border-slate-600")}>All</span>
                 </a>
-                <a href={buildHref({ q: searchQuery, momentum: "rising", window: windowFilter })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (momentumFilter === "rising"
-                        ? "border border-emerald-500/60 text-emerald-300 bg-emerald-500/10"
-                        : "border border-slate-600")
-                    }
-                  >
-                    Rising
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: "rising", window: windowFilter, source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (momentumFilter === "rising" ? "border border-emerald-500/60 text-emerald-300 bg-emerald-500/10" : "border border-slate-600")}>Rising</span>
                 </a>
-                <a href={buildHref({ q: searchQuery, momentum: "stable", window: windowFilter })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (momentumFilter === "stable"
-                        ? "border border-sky-500/60 text-sky-300 bg-sky-500/10"
-                        : "border border-slate-600")
-                    }
-                  >
-                    Stable
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: "stable", window: windowFilter, source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (momentumFilter === "stable" ? "border border-sky-500/60 text-sky-300 bg-sky-500/10" : "border border-slate-600")}>Stable</span>
                 </a>
-                <a href={buildHref({ q: searchQuery, momentum: "cooling", window: windowFilter })}>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 " +
-                      (momentumFilter === "cooling"
-                        ? "border border-amber-400/70 text-amber-300 bg-amber-500/10"
-                        : "border border-slate-600")
-                    }
-                  >
-                    Cooling
-                  </span>
+                <a href={buildHref({ q: searchQuery, momentum: "cooling", window: windowFilter, source: sourceFilter })}>
+                  <span className={"rounded-full px-3 py-1 " + (momentumFilter === "cooling" ? "border border-amber-400/70 text-amber-300 bg-amber-500/10" : "border border-slate-600")}>Cooling</span>
+                </a>
+              </div>
+            </div>
+
+            {/* SOURCE FILTER */}
+            <div className="flex items-center gap-2">
+              <span className="uppercase tracking-[0.18em] text-slate-400">
+                Source
+              </span>
+              <div className="flex gap-1">
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: windowFilter, source: "all" })}>
+                  <span className={"rounded-full px-3 py-1 " + (sourceFilter === "all" ? "bg-slate-200 text-slate-900" : "border border-slate-600")}>All</span>
+                </a>
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: windowFilter, source: "tiktok" })}>
+                  <span className={"rounded-full px-3 py-1 " + (sourceFilter === "tiktok" ? "border border-pink-500 text-pink-300 bg-pink-500/10" : "border border-slate-600")}>TikTok</span>
+                </a>
+                <a href={buildHref({ q: searchQuery, momentum: momentumFilter, window: windowFilter, source: "x" })}>
+                  <span className={"rounded-full px-3 py-1 " + (sourceFilter === "x" ? "border border-sky-500 text-sky-300 bg-sky-500/10" : "border border-slate-600")}>X</span>
                 </a>
               </div>
             </div>
@@ -274,7 +231,7 @@ export default async function HomePage({
         </section>
 
         {/* MAIN GRID */}
-        <section className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
+        <section className="grid gap-6 md:grid-cols-[2fr_1fr]">
           {/* TREND CARDS */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -295,73 +252,87 @@ export default async function HomePage({
                   momentum === "Rising"
                     ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/50"
                     : momentum === "Cooling"
-                    ? "bg-amber-500/15 text-amber-300 border-amber-500/60"
-                    : "bg-slate-700/40 text-slate-200 border-slate-500/50"
+                      ? "bg-amber-500/15 text-amber-300 border-amber-500/60"
+                      : "bg-slate-700/40 text-slate-200 border-slate-500/50"
 
                 return (
-                  <Link
-                    key={trend.id}
-                    href={`/trends/${trend.slug}`}
-                    className="block rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-950/95 px-4 py-3 md:px-5 md:py-4 hover:border-cyan-400/60 hover:bg-slate-900/90 transition"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-                            Trend
-                          </p>
-                        </div>
-                        <h2 className="text-base md:text-lg font-medium leading-tight">
-                          {trend.title}
-                        </h2>
-                        <p className="text-xs md:text-sm text-slate-300 max-w-xl">
-                          {trend.description || "No description yet."}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span
-                          className={
-                            "border rounded-full px-3 py-1 text-[11px] font-medium " +
-                            momentumColor
-                          }
-                        >
-                          {momentum}
-                        </span>
-                        <div className="text-right text-[11px] text-slate-400 space-y-0.5">
-                          <p>
-                            Global score{" "}
-                            <span className="text-slate-100 font-semibold">
-                              {typeof score === "number" ? score : "—"}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                  <div key={trend.id} className="space-y-2">
+                    <Link
+                      href={`/trends/${trend.slug}`}
+                      className="block rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-950/95 px-4 py-3 md:px-5 md:py-4 hover:border-cyan-400/60 hover:bg-slate-900/90 transition"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                              Trend
+                            </p>
+                          </div>
+                          <h2 className="text-base md:text-lg font-medium leading-tight">
+                            {trend.title}
+                          </h2>
 
-                    <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-slate-400">
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                        <span>Top location</span>
-                        <span className="text-slate-200 font-medium">
-                          {trend.top_location || "—"}
-                        </span>
+                          <TrendBadges source={trend.source} kind={trend.kind} />
+
+                          <p className="text-xs md:text-sm text-slate-300 max-w-xl">
+                            {trend.description || "No description yet."}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span
+                            className={
+                              "border rounded-full px-3 py-1 text-[11px] font-medium " +
+                              momentumColor
+                            }
+                          >
+                            {momentum}
+                          </span>
+                          <div className="text-right text-[11px] text-slate-400 space-y-0.5">
+                            <p>
+                              Global score{" "}
+                              <span className="text-slate-100 font-semibold">
+                                {typeof score === "number" ? score : "—"}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
-                        <span>Window</span>
-                        <span className="text-slate-200 font-medium">
-                          {trend.windowBucket === "24h"
-                            ? "24h"
-                            : trend.windowBucket === "today"
-                            ? "Today"
-                            : trend.windowBucket === "7d"
-                            ? "7 days"
-                            : "All"}
-                        </span>
+
+                      <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                          <span>Top location</span>
+                          <span className="text-slate-200 font-medium">
+                            {trend.top_location || "—"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+                          <span>Window</span>
+                          <span className="text-slate-200 font-medium">
+                            {trend.windowBucket === "24h"
+                              ? "24h"
+                              : trend.windowBucket === "today"
+                                ? "Today"
+                                : trend.windowBucket === "7d"
+                                  ? "7 days"
+                                  : "All"}
+                          </span>
+                        </div>
                       </div>
+                    </Link>
+
+                    {/* Open room link below the card */}
+                    <div className="text-[11px]">
+                      <Link
+                        href={`/rooms/${trend.slug}`}
+                        className="text-sky-300 hover:text-sky-200"
+                      >
+                        Open room →
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 )
               })}
 
@@ -412,3 +383,4 @@ export default async function HomePage({
     </main>
   )
 }
+

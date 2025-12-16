@@ -3,17 +3,20 @@ import { query } from "@/lib/db"
 
 export async function GET() {
   try {
+    // Pull everything your front-end needs
     const result = await query(
       `
-      select
-        id,
-        slug,
-        title,
-        description,
-        global_score
-      from trends
-      order by global_score desc
-      limit 20
+        select
+          id,
+          slug,
+          title,
+          description,
+          global_score,
+          source,
+          kind
+        from trends
+        order by global_score desc
+        limit 20
       `
     )
 

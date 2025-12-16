@@ -6,10 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "ingest:demo": "tsx scripts/ingestDemoTrends.ts",
+    "ingest:locations": "tsx scripts/ingestDemoTrendLocations.ts",
+    "ingest:real-google": "tsx scripts/ingestRealGoogleTrends.ts",
+    "inspect:gtrends": "tsx scripts/inspectGTrends.ts",
+    "ingest:x": "tsx scripts/ingestXTrends.ts",
+   "check:tiktok:videos": "tsx scripts/checkTikTokVideos.ts",
+    "ingest:tiktok": "tsx scripts/ingestTikTokTrends.ts"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
+    "g-trends": "^0.0.9",
+    "google-trends-api": "^4.9.2",
     "next": "16.0.5",
+    "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
@@ -23,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

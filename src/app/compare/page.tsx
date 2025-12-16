@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import { apiFetch } from "@/lib/apiClient"
+import { TrendBadges } from "@/components/TrendBadges"
 
 type Trend = {
   id: string
@@ -9,6 +10,8 @@ type Trend = {
   description?: string
   global_score?: number
   top_location?: string
+  source?: string
+  kind?: string
 }
 
 type CompareSearchParams = {
@@ -123,6 +126,9 @@ export default async function ComparePage({
             {leftTrend ? (
               <>
                 <h2 className="text-lg font-medium">{leftTrend.title}</h2>
+
+                <TrendBadges source={leftTrend.source} kind={leftTrend.kind} />
+
                 <p className="text-xs text-slate-300">
                   {leftTrend.description || "No description yet."}
                 </p>
@@ -175,6 +181,9 @@ export default async function ComparePage({
             {rightTrend ? (
               <>
                 <h2 className="text-lg font-medium">{rightTrend.title}</h2>
+
+                <TrendBadges source={rightTrend.source} kind={rightTrend.kind} />
+
                 <p className="text-xs text-slate-300">
                   {rightTrend.description || "No description yet."}
                 </p>
